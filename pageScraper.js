@@ -1,12 +1,31 @@
 // scrapes all of the books that are in stock from all product page
 const scraperObject = {
   url: "http://books.toscrape.com",
-  async scraper(browser) {
+  async scraper(browser, category) {
     let page = await browser.newPage();
     await page.goto(this.url);
+    let selectedCategory = await page.$$eval(
+      ".side_categories > ul > li > ul > li > a",
+      (links, _category) => {
+        // Search for the element that has the matching text
+        links = links.map((a) =>
+          a.textContent.replace(/(\r\n\t|\n|\r|\t|^\s|\s$|\B\s|\s\B)/gm, "") ===
+          _category
+            ? a
+            : null
+        );
+        let link = links.filter((tx) => tx !== null)[0];
+        return link.href;
+      },
+      category
+    );
+    // Navigate to the selected category
+    await page.goto(selectedCategory);
     let scrapedData = [];
+    //wait
     async function scrapeCurrentPage() {
       await page.waitForSelector(".page_inner");
+      // hrefs for the books
       let urls = await page.$$eval("section ol > li", (links) => {
         links = links.filter(
           (link) =>
