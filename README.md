@@ -1,2 +1,2 @@
 # doomscroller
- News scraper for doomscrolling
+ Scraper for future stuff
